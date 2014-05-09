@@ -1,3 +1,6 @@
+/target2
+/src/ring
+/test/ring
 /target
 /lib
 /classes
@@ -11,3 +14,5 @@ pom.xml.asc
 .lein-failures
 .lein-plugins
 .lein-repl-history
+.repl
+/target-test
