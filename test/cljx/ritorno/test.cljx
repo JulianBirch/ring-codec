@@ -1,11 +1,11 @@
-(ns ring.util.test.codec
+(ns ritorno.test
   #+clj (:use [clojure.test]
-              [ring.util.codec])
+              [ritorno])
   #+clj (:import java.util.Arrays)
   (:require #+clj [clojure.test :refer :all]
             #+cljs [cemerick.cljs.test :as t]
             [clojure.string :as str]
-            [ring.util.codec
+            [ritorno
              :refer [percent-encode #+clj percent-decode url-encode
                      url-decode base64-encode base64-decode
                      form-encode form-decode form-decode-str]])

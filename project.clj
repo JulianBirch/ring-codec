@@ -1,6 +1,6 @@
-(defproject ring/ring-codec "1.0.0"
+(defproject net.colourcoding/ritorno "1.0.0"
   :description "Library for encoding and decoding data"
-  :url "https://github.com/ring-clojure/ring-codec"
+  :url "https://github.com/JulianBirch/ritorno"
   :license {:name "The MIT License"
             :url "http://opensource.org/licenses/MIT"}
   :dependencies [[org.clojure/clojure "1.5.1"]
@@ -11,7 +11,7 @@
             [com.keminglabs/cljx "0.3.2"]
             [lein-cljsbuild "1.0.3"]
             [com.cemerick/clojurescript.test "0.3.0"]]
-  :codox {:src-dir-uri "http://github.com/ring-clojure/ring-codec/blob/1.0.0"
+  :codox {:src-dir-uri "http://github.com/JulianBirch/ritorno"
           :src-linenum-anchor-prefix "L"}
   :hooks [cljx.hooks
           leiningen.cljsbuild]

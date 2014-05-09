@@ -1,4 +1,4 @@
-(ns ring.util.codec
+(ns ritorno
   "Functions for encoding and decoding data."
   #+clj (:require [clojure.string :as str])
   #+clj (:import java.io.File
