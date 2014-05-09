@@ -1,9 +1,9 @@
-# Ring-Codec
+# ritorno
 
-[![Build Status](https://travis-ci.org/ring-clojure/ring-codec.png?branch=master)](https://travis-ci.org/ring-clojure/ring-codec)
+Functions for encoding and decoding data into formats commonly
+used in web applications.
 
-Functions for encoding and decoding data into formats commonly used in
-web applications.
+This is a cljx fork of ring.util.codec.
 
 ## Installation
 
