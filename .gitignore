@@ -1,6 +1,4 @@
 /target2
-/src/ring
-/test/ring
 /target
 /lib
 /classes
@@ -16,5 +14,3 @@ pom.xml.asc
 .lein-repl-history
 .repl
 /target-test
-/test/ritorno
-/src/ritorno.clj

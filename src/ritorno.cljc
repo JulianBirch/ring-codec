@@ -1,14 +1,14 @@
 (ns ritorno
   "Functions for encoding and decoding data."
-  #+clj (:require [clojure.string :as str])
-  #+clj (:import java.io.File
-                 java.util.Map
-                 [java.net URLEncoder URLDecoder]
-                 org.apache.commons.codec.binary.Base64)
-  #+cljs (:require [clojure.string :as str]
-                   [goog.crypt]
-                   [goog.crypt.base64]
-                   [goog.string]))
+  #?@(:clj [(:require [clojure.string :as str])
+            (:import java.io.File
+                     java.util.Map
+                     [java.net URLEncoder URLDecoder]
+                     org.apache.commons.codec.binary.Base64)]
+      :cljs [(:require [clojure.string :as str]
+                       [goog.crypt]
+                       [goog.crypt.base64]
+                       [goog.string])]))
 
 (defn assoc-conj
   "Associate a key with a value in a map. If the key already
@@ -28,41 +28,42 @@
 
 ; http://monsur.hossa.in/2012/07/20/utf-8-in-javascript.html
 (defn utf-encode [^String unencoded & [^String encoding]]
-  #+clj  (.getBytes unencoded (or encoding "UTF-8"))
-  #+cljs (let [encoded (-> unencoded
-                           js/escape
-                           js/decodeURIComponent)]
-           (->> (range (count encoded))
-                (map #(.charCodeAt encoded %)))))
+  #? (:clj (.getBytes unencoded (or encoding "UTF-8"))
+      :cljs (let [encoded (-> unencoded
+                              js/escape
+                              js/decodeURIComponent)]
+                   (->> (range (count encoded))
+                        (map #(.charCodeAt encoded %))))))
 
 (defn percent-encode-byte [b]
-  #+clj  (format "%%%02X" b)
-  #+cljs (str "%" (.toString b 16)))
-#+clj (do
-  (def ^:private string-replace-bug?
-    (= "x" (str/replace "x" #"." (fn [x] "$0"))))
+  #? (:clj (format "%%%02X" b)
+      :cljs (str "%" (.toString b 16))))
 
-  (defmacro fix-string-replace-bug [x]
-    (if string-replace-bug?
-      `(double-escape ~x)
-      x))
+#? (:clj (do
+           (def ^:private string-replace-bug?
+             (= "x" (str/replace "x" #"." (fn [x] "$0"))))
 
-  (defn- parse-bytes [encoded-bytes]
-    (->> (re-seq #"%.." encoded-bytes)
-         (map #(subs % 1))
-         (map #(.byteValue (Integer/valueOf % 16)))
-         (byte-array)))
+           (defmacro fix-string-replace-bug [x]
+             (if string-replace-bug?
+               `(double-escape ~x)
+               x))
 
-  (defn percent-decode
-    "Decode every percent-encoded character in the given string
+           (defn- parse-bytes [encoded-bytes]
+             (->> (re-seq #"%.." encoded-bytes)
+                  (map #(subs % 1))
+                  (map #(.byteValue (Integer/valueOf % 16)))
+                  (byte-array)))
+
+           (defn percent-decode
+             "Decode every percent-encoded character in the given string
      using the specified encoding, or UTF-8 by default."
-    [^String encoded & [^String encoding]]
-    (str/replace encoded
-                 #"(?:%..)+"
-                 (fn [chars]
-                   (-> ^bytes (parse-bytes chars)
-                       (String. (or encoding "UTF-8"))
-                       (fix-string-replace-bug))))))
+             [^String encoded & [^String encoding]]
+             (str/replace encoded
+                          #"(?:%..)+"
+                          (fn [chars]
+                            (-> ^bytes (parse-bytes chars)
+                                (String. (or encoding "UTF-8"))
+                                (fix-string-replace-bug)))))))
 
 (defn percent-encode
   "Percent-encode every character in the given string using either
@@ -85,29 +86,29 @@
    either a specified encoding or UTF-8 by default. If the encoding
    is invalid, nil is returned."
   [encoded & [encoding]]
-  #+clj (percent-decode encoded encoding)
-  #+cljs (js/decodeURIComponent encoded))
+  #? (:clj (percent-decode encoded encoding)
+      :cljs (js/decodeURIComponent encoded)))
 
 (defn base64-encode
   "Encode an array of bytes into a base64 encoded string."
   [unencoded]
-  #+clj (String. (Base64/encodeBase64 unencoded))
-  #+cljs (goog.crypt.base64/encodeString unencoded))
+  #? (:clj (String. (Base64/encodeBase64 unencoded))
+      :cljs (goog.crypt.base64/encodeString unencoded)))
 
 (defn base64-decode
   "Decode a base64 encoded string into an array of bytes."
   [^String encoded]
-  #+clj (Base64/decodeBase64 (.getBytes encoded))
-  #+cljs (goog.crypt.base64/decodeString encoded))
+  #? (:clj (Base64/decodeBase64 (.getBytes encoded))
+      :cljs (goog.crypt.base64/decodeString encoded)))
 
 (defprotocol FormEncodeable
   (form-encode* [x encoding]))
 
 (defn form-encode-str [^String unencoded ^String encoding]
-  #+clj (URLEncoder/encode unencoded encoding)
-  #+cljs (-> unencoded
-             js/encodeURIComponent
-             (str/replace "%20" "+")))
+  #?(:clj (URLEncoder/encode unencoded encoding)
+     :cljs (-> unencoded
+               js/encodeURIComponent
+               (str/replace "%20" "+"))))
 
 (declare form-encode)
 
@@ -138,11 +139,11 @@
    specified encoding, or UTF-8 by default."
   [^String encoded & [encoding]]
   (try
-    #+clj (URLDecoder/decode encoded (or encoding "UTF-8"))
-    #+cljs (-> encoded
-               (url-decode (or encoding "UTF-8"))
-               (str/replace "+" " "))
-    (catch #+clj Exception #+cljs js/Object _ nil)))
+    #? (:clj (URLDecoder/decode encoded (or encoding "UTF-8"))
+        :cljs (-> encoded
+                  (url-decode (or encoding "UTF-8"))
+                  (str/replace "+" " ")))
+    (catch #?(:clj Exception :cljs js/Object) _ nil)))
 
 (defn form-decode
   "Decode the supplied www-form-urlencoded string using the
@@ -151,8 +152,8 @@
    of parameters, a map is returned."
   [^String encoded & [encoding]]
   (if-not
-      #+clj (.contains encoded "=")
-      #+cljs (>= (.indexOf encoded "=") 0)
+      #? (:clj (.contains encoded "=")
+          :cljs (>= (.indexOf encoded "=") 0))
     (form-decode-str encoded encoding)
     (reduce
      (fn [m param]
